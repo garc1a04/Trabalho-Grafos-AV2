@@ -1,77 +1,61 @@
 import os
-import numpy as np
 from algs4.graph import Graph
 from algs4.depth_first_paths import DepthFirstPaths
 from algs4.breadth_first_paths import BreadthFirstPaths
 
-caminho_arquivo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "nordeste.txt")
+# Mapeamento para facilitar a leitura
+ESTADOS = {
+    0: "AL", 1: "BA", 2: "CE", 3: "MA", 4: "PB", 
+    5: "PE", 6: "PI", 7: "RN", 8: "SE"
+}
 
-with open(caminho_arquivo, 'r') as f:
-        V = int(f.readline())
-        E = int(f.readline())
-        
-        g = Graph(V)
-        for _ in range(E):
-            linha = f.readline().split()
-            if linha:
-                v = int(linha[0])
-                w = int(linha[1])
-                g.add_edge(v, w)
-                
-"""
-Perguntas que o programa deve responder
+def carregar_grafo():
+    caminho_arquivo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "nordeste.txt")
+    try:
+        with open(caminho_arquivo, 'r') as f:
+            V = int(f.readline().strip())
+            E = int(f.readline().strip())
+            g = Graph(V)
+            for _ in range(E):
+                linha = f.readline().split()
+                if linha:
+                    g.add_edge(int(linha[0]), int(linha[1]))
+            return g, V
+    except FileNotFoundError:
+        print("Erro: Arquivo 'nordeste.txt' não encontrado.")
+        return None, 0
 
-Dado o estado de origem X e o estado de destino Y, é possível sair de X e chegar a Y atravessando apenas fronteiras terrestres?
-
-Qual caminho foi encontrado pela DFS do estado de origem X até o estado de destino Y?
-
-Qual caminho foi encontrado pela BFS do estado de origem X até o estado de destino Y?
-
-Qual foi a ordem de visita dos estados na execução da DFS a partir de X?
-
-Qual foi a ordem de visita dos estados na execução da BFS a partir de X?
-
-R: Sim
-"""
-
-print(g)
-
-X = int(input("\ndigite um estado de origem\n0 (AL) 1 (BA)  2 (CE)  3 (MA)  4 (PB)  5 (PE) 6 (PI)  7 (RN) 8 (SE)"))
-
-dfs = DepthFirstPaths(g, X)
-
-Y = int(input("\ndigite um estado de destino\n0 (AL) 1 (BA)  2 (CE)  3 (MA)  4 (PB)  5 (PE) 6 (PI)  7 (RN) 8 (SE)\n"))
-print(dfs.has_path_to(Y))
-print(dfs.path_to(Y))
-
-"""
-BFS
-"""
-
-x = int(input("\ndigite um estado de origem\n0 (AL) 1 (BA)  2 (CE)  3 (MA)  4 (PB)  5 (PE) 6 (PI)  7 (RN) 8 (SE)"))
-
-bfs = BreadthFirstPaths(g, x)
-
-y = int(input("\ndigite um estado de destino\n0 (AL) 1 (BA)  2 (CE)  3 (MA)  4 (PB)  5 (PE) 6 (PI)  7 (RN) 8 (SE)\n"))
-print(bfs.has_path_to(y))
-print(bfs.path_to(y))
-
-bp = 1
+def exibir_caminho(path_iter):
+    if path_iter is None: return "Nenhum caminho encontrado"
+    return " -> ".join([ESTADOS[v] for v in path_iter])
 
 
-"""
-Quantos estados são alcançáveis a partir do estado de origem X?
-"""
+def main():
+    g, V = carregar_grafo()
+    if not g: return
 
-count_dfs = 0
-count_bfs = 0
-for i in range(0, V):
-    if dfs.has_path_to(i):
-        count_dfs+=1
-    if bfs.has_path_to(i):
-        count_bfs+=1
-        
-print(count_dfs)
-print(count_bfs)
+    print("--- Analisador de Fronteiras do Nordeste ---")
+    origem = int(input("Digite o ID do estado de ORIGEM (0-8): "))
+    destino = int(input("Digite o ID do estado de DESTINO (0-8): "))
 
-bp = 1
+    # Execução dos Algoritmos
+    dfs = DepthFirstPaths(g, origem)
+    bfs = BreadthFirstPaths(g, origem)
+
+    print(f"\nResultados de {ESTADOS[origem]} para {ESTADOS[destino]}:")
+    print("-" * 40)
+    
+    # 1. Possibilidade de chegar
+    possivel = dfs.has_path_to(destino)
+    print(f"É possível chegar por terra? {'Sim' if possivel else 'Não'}")
+    
+    print(f"Caminho encontrado pela DFS: {exibir_caminho(dfs.path_to(destino))}")
+
+    print(f"Caminho encontrado pela BFS: {exibir_caminho(bfs.path_to(destino))}")
+
+    # 4. Estados alcançáveis
+    alcansaveis = sum(1 for i in range(V) if dfs.has_path_to(i))
+    print(f"Total de estados alcançáveis a partir de {ESTADOS[origem]}: {alcansaveis}")
+
+if __name__ == "__main__":
+    main()

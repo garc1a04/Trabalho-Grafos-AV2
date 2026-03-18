@@ -57,7 +57,8 @@ class DepthFirstPaths:
         while x != self.s:
             path.push(x)
             x = self.edge_to[x]
-        path.push(s)
+            
+        path.push(self.s)
         return path
 
 if __name__ == '__main__':

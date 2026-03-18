@@ -1,0 +1,9 @@
+AL - BA; PE; SE.
+BA - AL; PE; PI; SE.
+CE - PB; PE; PI; RN.
+MA - PI.
+PB - CE; PE; RN.
+PE - AL; BA; CE; PB; PI.
+PI - BA; CE; MA; PE.
+RN - CE; PB.
+SE - AL; BA.

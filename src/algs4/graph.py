@@ -72,14 +72,21 @@ class Graph:
                     count += 1
         return count
 
-
 if __name__ == '__main__':
-    import sys
-    f = open(sys.argv[1])
-    V = int(f.readline())
-    E = int(f.readline())
-    g = Graph(V)
-    for i in range(E):
-        v, w = f.readline().split()
-        g.add_edge(v, w)
+    import os
+    
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    arquivo = os.path.join(base_dir, "..", "data", "nordeste.txt")
+
+    with open(arquivo, 'r') as f:
+        V = int(f.readline())
+        E = int(f.readline())
+        
+        g = Graph(V)
+        for _ in range(E):
+            linha = f.readline().split()
+            if linha:
+                v = int(linha[0])
+                w = int(linha[1])
+                g.add_edge(v, w)
     print(g)

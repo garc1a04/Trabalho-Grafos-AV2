@@ -66,19 +66,15 @@ class BreadthFirstPaths:
         return self._marked[v]
 
     def path_to(self, v):
-        dist = 0
-        
         if not self.has_path_to(v):
-            return None, -1
-        
+            return
         path = Stack()
         x = v
         while x != self.s:
             path.push(x)
             x = self.edge_to[x]
-            dist+=1
         path.push(self.s)
-        return path, dist
+        return path
 
 
 if __name__ == '__main__':

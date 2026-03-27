@@ -1,53 +1,61 @@
 import os
-from algs4.breadth_first_paths import BreadthFirstPaths
 from algs4.graph import Graph
-from algs4.cycle import Cycle
-from algs4.cc import CC
+from algs4.depth_first_paths import DepthFirstPaths
+from algs4.breadth_first_paths import BreadthFirstPaths
 
-caminho_arquivo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "entrada.txt")
+# Mapeamento para facilitar a leitura
+ESTADOS = {
+    0: "AL", 1: "BA", 2: "CE", 3: "MA", 4: "PB", 
+    5: "PE", 6: "PI", 7: "RN", 8: "SE"
+}
 
-with open(caminho_arquivo, 'r') as f:
-    V = int(f.readline())
-    E = int(f.readline())
-    graph = Graph(V)
+def carregar_grafo():
+    caminho_arquivo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "nordeste.txt")
+    try:
+        with open(caminho_arquivo, 'r') as f:
+            V = int(f.readline().strip())
+            E = int(f.readline().strip())
+            g = Graph(V)
+            for _ in range(E):
+                linha = f.readline().split()
+                if linha:
+                    g.add_edge(int(linha[0]), int(linha[1]))
+            return g, V
+    except FileNotFoundError:
+        print("Erro: Arquivo 'nordeste.txt' não encontrado.")
+        return None, 0
+
+def exibir_caminho(path_iter):
+    if path_iter is None: return "Nenhum caminho encontrado"
+    return " -> ".join([ESTADOS[v] for v in path_iter])
+
+
+def main():
+    g, V = carregar_grafo()
+    if not g: return
+
+    print("--- Analisador de Fronteiras do Nordeste ---")
+    origem = int(input("Digite o ID do estado de ORIGEM (0-8): "))
+    destino = int(input("Digite o ID do estado de DESTINO (0-8): "))
+
+    # Execução dos Algoritmos
+    dfs = DepthFirstPaths(g, origem)
+    bfs = BreadthFirstPaths(g, origem)
+
+    print(f"\nResultados de {ESTADOS[origem]} para {ESTADOS[destino]}:")
+    print("-" * 40)
     
-    for _ in range(E):
-        v, w = map(int, f.readline().split())
-        graph.add_edge(v, w)
+    # 1. Possibilidade de chegar
+    possivel = dfs.has_path_to(destino)
+    print(f"É possível chegar por terra? {'Sim' if possivel else 'Não'}")
+    
+    print(f"Caminho encontrado pela DFS: {exibir_caminho(dfs.path_to(destino))}")
 
-print("Lista de adjacência:")
-for v in range(graph.V):
-    adjacentes = " ".join(str(w) for w in graph.adj[v])
-    print(f"{v}: {adjacentes}")
-print()
+    print(f"Caminho encontrado pela BFS: {exibir_caminho(bfs.path_to(destino))}")
 
-cc = CC(graph)
-print(f"Componentes conexas: {cc.count}")
+    # 4. Estados alcançáveis
+    alcansaveis = sum(1 for i in range(V) if dfs.has_path_to(i))
+    print(f"Total de estados alcançáveis a partir de {ESTADOS[origem]}: {alcansaveis}")
 
-componentes = [[] for _ in range(cc.count)]
-for v in range(graph.V):
-    componentes[cc.id[v]].append(v)
-
-for i, comp in enumerate(componentes):
-    print(f"Vértices da componente {i}:", *comp)
-print()
-
-origem = 0
-destino = 8
-BFS = BreadthFirstPaths(graph, origem)
-path, dist = BFS.path_to(destino)
-
-print("Caminho mínimo:", " ".join(str(v) for v in path))
-print(f"Distância mínima entre o vértice {origem} e o vértice {destino}: {dist}\n")
-
-cycle = Cycle(graph)
-possui_ciclo = "Sim" if cycle.has_cycle else "Não"
-print(f"O grafo possui ciclo: {possui_ciclo}")
-
-if cycle.has_cycle and cycle.cycle:
-    caminho_ciclo = " ".join(str(v) for v in cycle.cycle)
-    print(f"Um ciclo encontrado: {caminho_ciclo}")
-
-print("\nComplexidade:\nTempo: O(V + E)\nEspaço: O(V)")
-
-bp = 1
+if __name__ == "__main__":
+    main()
